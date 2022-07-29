@@ -31,7 +31,7 @@ Select the above or below row. If you have more 2FA codes that can fit on your s
 Cycles the app colour/theme between your terminal colours. Will be saved to `colour` in the install directory only if the program is quit with `Q`.
 
 `S`  
-Runs the script `script.sh` in the install directory, passing the current code's name & displayed code.  
+Runs the script `script.sh` in the install directory, passing the selected row's name & displayed code.  
 This could be used for example to copy the code to the clipboard, but as clipboards are very WM-dependent, you'll have to write the script yourself.  
 A workaround for SXMO (since nothing supports its clipboard) is to call `xdotool` to type the code after a few seconds.
 
