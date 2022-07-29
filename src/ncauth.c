@@ -46,7 +46,6 @@ int read_authcodes (AuthCode* authcodes, int* counter, char* path) {
         fclose(file);
     } else {
         printf("No such secrets file\n");
-        exit(1);
     }
 }
 
