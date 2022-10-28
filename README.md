@@ -33,7 +33,7 @@ Cycles the app colour/theme between your terminal colours. Will be saved to `col
 `S`  
 Runs the script `script.sh` in the install directory, passing the current code's name & displayed code.  
 This could be used for example to copy the code to the clipboard, but as clipboards are very WM-dependent, you'll have to write the script yourself.  
-A workaround for SXMO (since nothing supports its clipboard) is to call `xdotool` to type the code after a few seconds.
+If you can't access your clipboard, a workaround could be to call `xdotool` to type the code after a few seconds.
 
 `E`  
 Runs the script `edit.sh` in the install directory, passing the current file name.  
