@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include <sys/ioctl.h>
 #include <ncurses.h>
 #include <string.h>
 #include <time.h>
@@ -242,7 +241,6 @@ int main (int argc, char *argv[]) {
     int select, scroll, name_width, last_hotp = 0;
     int highlight, highlight_time = 0;
     bool view_next = FALSE;
-    struct winsize win_size, prev_win_size;
     
     int colour = read_colour();
     set_colour(colour);
@@ -263,19 +261,11 @@ int main (int argc, char *argv[]) {
             view_next = FALSE;
         }
         
-        // Check if window size has changed in either direction
-        ioctl(STDOUT_FILENO, TIOCGWINSZ, &win_size);
-        if (win_size.ws_col != prev_win_size.ws_col || win_size.ws_row != prev_win_size.ws_row) {
-            // Auth code takes 7 chars (with space), plus 2 padding in between & 2 padding outside
-            name_width = win_size.ws_col - 11;
-            
-            scroll = calc_scroll(select, authcodec, win_size.ws_row - 1);
-            
-            // Update previous window size
-            prev_win_size.ws_col = win_size.ws_col;
-            prev_win_size.ws_row = win_size.ws_row;
-        }
+        // Auth code takes 7 chars (with space), plus 2 padding in between & 2 padding outside
+        name_width = COLS - 11;
         
+        scroll = calc_scroll(select, authcodec, LINES - 1);
+            
         
         char script_sh[512];
         
@@ -283,11 +273,11 @@ int main (int argc, char *argv[]) {
             // Change selection
             case 'k':
                 if (select != 0)
-                    scroll = calc_scroll(--select, authcodec, win_size.ws_row - 1);
+                    scroll = calc_scroll(--select, authcodec, LINES - 1);
                 break;
             case 'j':
                 if (select != authcodec - 1)
-                    scroll = calc_scroll(++select, authcodec, win_size.ws_row - 1);
+                    scroll = calc_scroll(++select, authcodec, LINES - 1);
                 break;
             
             // Toggle next view
@@ -351,7 +341,7 @@ int main (int argc, char *argv[]) {
                 attron(A_ITALIC);
             
             // Run only in visible codes, dependent on scroll & list count
-            for (int a = 0; a < (min(win_size.ws_row - 1, authcodec - scroll)); a++) {
+            for (int a = 0; a < (min(LINES - 1, authcodec - scroll)); a++) {
                 int aa = a + scroll;
                 
                 // Copy account name to temp var
@@ -384,7 +374,7 @@ int main (int argc, char *argv[]) {
                 
                 if (aa == select) {
                     // Calculate progress bar based off time
-                    int pbar = ((curtime.tv_sec * 100 + curtime.tv_nsec / 10000000) % 3000) * win_size.ws_col / 3000;
+                    int pbar = ((curtime.tv_sec * 100 + curtime.tv_nsec / 10000000) % 3000) * COLS / 3000;
                     
                     // Split left & right sides of text within progress bar
                     char left[512];
@@ -410,32 +400,32 @@ int main (int argc, char *argv[]) {
         } else {
             // If no codes, show error in middle of screen
             attron(A_BLINK);
-            mvprintw((win_size.ws_row - 1) / 2, win_size.ws_col / 2 - 6, "- No codes -");
+            mvprintw((LINES - 1) / 2, COLS / 2 - 6, "- No codes -");
             attroff(A_BLINK);
         }
         
         attron(A_BOLD);
         attron(COLOR_PAIR(2));
         // Show controls at bottom of screen, just the hotkeys if terminal's too narrow
-        if (win_size.ws_col >= 39) {
-            mvprintw(win_size.ws_row - 1, 0, "[KJ]^/v");
-            mvprintw(win_size.ws_row - 1, win_size.ws_col / 4 - 1, "[C]olour");
+        if (COLS >= 39) {
+            mvprintw(LINES - 1, 0, "[KJ]^/v");
+            mvprintw(LINES - 1, COLS / 4 - 1, "[C]olour");
             if (highlight_time != 0) attron(A_BLINK);
-            mvprintw(win_size.ws_row - 1, win_size.ws_col / 2 - 2, "[S]cript");
+            mvprintw(LINES - 1, COLS / 2 - 2, "[S]cript");
             attroff(A_BLINK);
-            mvprintw(win_size.ws_row - 1, win_size.ws_col * 3 / 4 - 3, "[E]dit");
+            mvprintw(LINES - 1, COLS * 3 / 4 - 3, "[E]dit");
             if (view_next) attron(A_BLINK);
-            mvprintw(win_size.ws_row - 1, win_size.ws_col - 6, "[N]ext");
+            mvprintw(LINES - 1, COLS - 6, "[N]ext");
             attroff(A_BLINK);
         } else {
-            mvprintw(win_size.ws_row - 1, 0, "[KJ]");
-            mvprintw(win_size.ws_row - 1, win_size.ws_col / 4, "[C]");
+            mvprintw(LINES - 1, 0, "[KJ]");
+            mvprintw(LINES - 1, COLS / 4, "[C]");
             if (highlight_time != 0) attron(A_BLINK);
-            mvprintw(win_size.ws_row - 1, win_size.ws_col / 2 - 1, "[S]");
+            mvprintw(LINES - 1, COLS / 2 - 1, "[S]");
             attroff(A_BLINK);
-            mvprintw(win_size.ws_row - 1, win_size.ws_col * 3 / 4 - 2, "[E]");
+            mvprintw(LINES - 1, COLS * 3 / 4 - 2, "[E]");
             if (view_next) attron(A_BLINK);
-            mvprintw(win_size.ws_row - 1, win_size.ws_col - 3, "[N]");
+            mvprintw(LINES - 1, COLS - 3, "[N]");
             attroff(A_BLINK);
         }
         attroff(A_BOLD);
