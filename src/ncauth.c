@@ -337,9 +337,6 @@ int main (int argc, char *argv[]) {
         
         
         if (authcodec != 0) {
-            if (view_next)
-                attron(A_ITALIC);
-            
             // Run only in visible codes, dependent on scroll & list count
             for (int a = 0; a < (min(LINES - 1, authcodec - scroll)); a++) {
                 int aa = a + scroll;
@@ -382,14 +379,13 @@ int main (int argc, char *argv[]) {
                     left[pbar + 1] = '\0';
                     
                     // Colour left side & uncolour right
-                    attron(COLOR_PAIR(1));
+                    attrset(view_next ? COLOR_PAIR(2) : COLOR_PAIR(1));
                     mvprintw(a, 0, "%s", left);
-                    attroff(COLOR_PAIR(1));
-                    attron(COLOR_PAIR(2));
+                    attrset(view_next ? COLOR_PAIR(1) : COLOR_PAIR(2));
                     mvprintw(a, pbar + 1, "%s", &text[pbar + 1]);
-                    attroff(COLOR_PAIR(2));
                 } else {
                     // If not selected, just print normally
+                    attrset(COLOR_PAIR(0));
                     mvprintw(a, 0, "%s", text);
                 }
                 
@@ -404,8 +400,8 @@ int main (int argc, char *argv[]) {
             attroff(A_BLINK);
         }
         
+        attrset(COLOR_PAIR(2));
         attron(A_BOLD);
-        attron(COLOR_PAIR(2));
         // Show controls at bottom of screen, just the hotkeys if terminal's too narrow
         if (COLS >= 39) {
             mvprintw(LINES - 1, 0, "[KJ]^/v");
